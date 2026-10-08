@@ -3,19 +3,583 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ActiveKIds Sports & Fitness Club</title>
+    <title>ActiveKids Sports & Fitness Club</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <link rel="stylesheet" href="../SportsClubFrontend/src/style.css">
 </head>
+
 <body>
+
     <div id="app">
-        <h1>Welcome to ActiveKIds Sports & Fitness Club</h1>
-        <p>Join us for a fun and active experience!</p>
+
+        <!-- Navigation -->
+        <nav class="navbar">
+
+            <h2 class="logo">
+                {{ sitename }}
+            </h2>
+
+            <ul class="nav-links">
+                <li>
+                    <a href="#home">Home</a>
+                </li>
+
+                <li>
+                    <a href="#activities">Activities</a>
+                </li>
+
+                <li>
+                    <a href="#about">About</a>
+                </li>
+
+                <li>
+                    <a href="#booking">Bookings</a>
+                </li>
+            </ul>
+
+            <button
+                class="cart-button"
+                @click="goToBooking"
+            >
+                Bookings ({{ cart.length }})
+            </button>
+
+        </nav>
+
+
+        <!-- Home -->
+        <section id="home" class="hero">
+
+            <div class="hero-content">
+
+                <h1>
+                    Welcome to {{ sitename }}
+                </h1>
+
+                <p>
+                    Join us for a fun and active experience!
+                </p>
+
+                <button
+                    class="main-button"
+                    @click="goToActivities"
+                >
+                    View Activities
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- About -->
+        <section id="about" class="about">
+
+            <div class="section-title">
+
+                <h2>Why Choose ActiveKids?</h2>
+
+                <p>
+                    We help children stay active, healthy and confident.
+                </p>
+
+            </div>
+
+            <div class="about-cards">
+
+                <div class="about-card">
+
+                    <div class="about-icon">
+                        ⚽
+                    </div>
+
+                    <h3>Fun Activities</h3>
+
+                    <p>
+                        Children can take part in different sports
+                        and fitness activities.
+                    </p>
+
+                </div>
+
+
+                <div class="about-card">
+
+                    <div class="about-icon">
+                        🏆
+                    </div>
+
+                    <h3>Build Confidence</h3>
+
+                    <p>
+                        Our activities help children develop teamwork,
+                        confidence and new skills.
+                    </p>
+
+                </div>
+
+
+                <div class="about-card">
+
+                    <div class="about-icon">
+                        ❤️
+                    </div>
+
+                    <h3>Healthy Lifestyle</h3>
+
+                    <p>
+                        We encourage children to stay active and
+                        develop healthy habits.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Activities -->
+        <section id="activities" class="activities">
+
+            <div class="section-title">
+
+                <h2>Our Activities</h2>
+
+                <p>
+                    Choose an activity to add to your booking.
+                </p>
+
+            </div>
+
+
+            <!-- Search and filter -->
+            <div class="search">
+
+                <input
+                    type="text"
+                    v-model="search"
+                    placeholder="Search activities..."
+                    class="search-box"
+                >
+
+                <select
+                    v-model="selectedCategory"
+                    class="category-select"
+                >
+
+                    <option value="All">
+                        All Activities
+                    </option>
+
+                    <option
+                        v-for="category in categories"
+                        :value="category"
+                    >
+                        {{ category }}
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Activity cards -->
+            <div class="activity-list">
+
+                <div
+                    v-for="activity in filteredActivities"
+                    :key="activity.id"
+                    class="activity-card"
+                >
+
+                    <img
+                        :src="activity.image"
+                        :alt="activity.name"
+                        class="activity-image"
+                    >
+
+                    <div class="activity-info">
+
+                        <h3>
+                            {{ activity.name }}
+                        </h3>
+
+                        <p>
+                            {{ activity.description }}
+                        </p>
+
+                        <p>
+                            <strong>Age:</strong>
+                            {{ activity.age }}
+                        </p>
+
+                        <p>
+                            <strong>Day:</strong>
+                            {{ activity.day }}
+                        </p>
+
+                        <p>
+                            <strong>Time:</strong>
+                            {{ activity.time }}
+                        </p>
+
+                        <p class="activity-price">
+                            £{{ activity.price }}
+                        </p>
+
+                        <p>
+                            <strong>Spaces:</strong>
+                            {{ activity.spaces }}
+                        </p>
+
+                        <button
+                            class="book-button"
+                            @click="addToCart(activity)"
+                            :disabled="activity.spaces === 0"
+                        >
+                            {{ activity.spaces > 0
+                                ? 'Add to Booking'
+                                : 'Fully Booked'
+                            }}
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Booking -->
+        <section id="booking" class="booking">
+
+            <div class="section-title">
+
+                <h2>Your Bookings</h2>
+
+                <p>
+                    Review the activities you have selected.
+                </p>
+
+            </div>
+
+
+            <div class="booking-box">
+
+                <div
+                    v-if="cart.length === 0"
+                    class="empty-booking"
+                >
+                    <p>
+                        You have not selected any activities.
+                    </p>
+                </div>
+
+
+                <div
+                    v-for="(item, index) in cart"
+                    :key="index"
+                    class="booking-item"
+                >
+
+                    <div>
+
+                        <h3>
+                            {{ item.name }}
+                        </h3>
+
+                        <p>
+                            {{ item.day }} - {{ item.time }}
+                        </p>
+
+                    </div>
+
+                    <div>
+
+                        <span class="booking-price">
+                            £{{ item.price }}
+                        </span>
+
+                        <button
+                            class="remove-button"
+                            @click="removeFromCart(index)"
+                        >
+                            Remove
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    v-if="cart.length > 0"
+                    class="booking-total"
+                >
+
+                    <h3>
+                        Total: £{{ cartTotal }}
+                    </h3>
+
+                    <button
+                        class="main-button"
+                        @click="confirmBooking"
+                    >
+                        Confirm Booking
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="footer">
+
+            <h3>
+                {{ sitename }}
+            </h3>
+
+            <p>
+                Fun • Fitness • Friendship
+            </p>
+
+            <p>
+                © 2026 ActiveKids Sports & Fitness Club
+            </p>
+
+        </footer>
+
     </div>
 
+
+    <!-- Vue JavaScript -->
     <script>
+
         new Vue({
-            el: '#app'
+
+            el: '#app',
+
+            data: {
+
+                sitename: 'ActiveKids Sports & Fitness Club',
+
+                search: '',
+
+                selectedCategory: 'All',
+
+                cart: [],
+
+                activities: [
+
+                    {
+                        id: 1,
+                        name: 'Football',
+                        category: 'Team Sports',
+                        description: 'Learn football skills, teamwork and game techniques.',
+                        age: '6-14',
+                        day: 'Saturday',
+                        time: '10:00 AM',
+                        price: 15,
+                        spaces: 15,
+                        image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80'
+                    },
+
+                    {
+                        id: 2,
+                        name: 'Basketball',
+                        category: 'Team Sports',
+                        description: 'Develop basketball skills while playing fun team games.',
+                        age: '8-15',
+                        day: 'Sunday',
+                        time: '11:00 AM',
+                        price: 18,
+                        spaces: 12,
+                        image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80'
+                    },
+
+                    {
+                        id: 3,
+                        name: 'Swimming',
+                        category: 'Fitness',
+                        description: 'Improve swimming skills and water confidence.',
+                        age: '6-14',
+                        day: 'Wednesday',
+                        time: '4:00 PM',
+                        price: 20,
+                        spaces: 10,
+                        image: 'https://images.unsplash.com/photo-1600965962361-9035dbfd1c50?auto=format&fit=crop&w=800&q=80'
+                    },
+
+                    {
+                        id: 4,
+                        name: 'Gymnastics',
+                        category: 'Fitness',
+                        description: 'Build flexibility, balance and coordination.',
+                        age: '5-12',
+                        day: 'Tuesday',
+                        time: '5:00 PM',
+                        price: 16,
+                        spaces: 8,
+                        image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80'
+                    },
+
+                    {
+                        id: 5,
+                        name: 'Tennis',
+                        category: 'Racket Sports',
+                        description: 'Learn tennis fundamentals and improve your technique.',
+                        age: '7-15',
+                        day: 'Friday',
+                        time: '4:30 PM',
+                        price: 17,
+                        spaces: 10,
+                        image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=80'
+                    },
+
+                    {
+                        id: 6,
+                        name: 'Athletics',
+                        category: 'Fitness',
+                        description: 'Improve speed, strength and overall athletic ability.',
+                        age: '8-16',
+                        day: 'Thursday',
+                        time: '5:30 PM',
+                        price: 14,
+                        spaces: 20,
+                        image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80'
+                    }
+
+                ]
+
+            },
+
+
+            computed: {
+
+                categories() {
+
+                    return [
+                        ...new Set(
+                            this.activities.map(
+                                activity => activity.category
+                            )
+                        )
+                    ];
+
+                },
+
+
+                filteredActivities() {
+
+                    return this.activities.filter(activity => {
+
+                        let matchesSearch =
+                            activity.name
+                                .toLowerCase()
+                                .includes(
+                                    this.search.toLowerCase()
+                                );
+
+                        let matchesCategory =
+                            this.selectedCategory === 'All' ||
+                            activity.category === this.selectedCategory;
+
+                        return matchesSearch && matchesCategory;
+
+                    });
+
+                },
+
+
+                cartTotal() {
+
+                    return this.cart.reduce(
+                        (total, item) => total + item.price,
+                        0
+                    );
+
+                }
+
+            },
+
+
+            methods: {
+
+                addToCart(activity) {
+
+                    if (activity.spaces > 0) {
+
+                        this.cart.push(activity);
+
+                        activity.spaces--;
+
+                    }
+
+                },
+
+
+                removeFromCart(index) {
+
+                    let activity = this.cart[index];
+
+                    let originalActivity =
+                        this.activities.find(
+                            item => item.id === activity.id
+                        );
+
+                    if (originalActivity) {
+
+                        originalActivity.spaces++;
+
+                    }
+
+                    this.cart.splice(index, 1);
+
+                },
+
+
+                goToActivities() {
+
+                    document
+                        .getElementById('activities')
+                        .scrollIntoView({
+                            behavior: 'smooth'
+                        });
+
+                },
+
+
+                goToBooking() {
+
+                    document
+                        .getElementById('booking')
+                        .scrollIntoView({
+                            behavior: 'smooth'
+                        });
+
+                },
+
+
+                confirmBooking() {
+
+                    alert(
+                        'Booking confirmed! Your total is £' +
+                        this.cartTotal
+                    );
+
+                }
+
+            }
+
         });
+
     </script>
+
 </body>
 </html>
